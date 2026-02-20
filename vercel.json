@@ -13,6 +13,8 @@
     }
   ],
   "env": {
-    "NODE_ENV": "production"
+    "GOOGLE_CLIENT_ID": "458496826439-2kbdbgtm695ho8l7nbtr3ll4uleuo9f3.apps.googleusercontent.com",
+    "GOOGLE_CLIENT_SECRET": "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",
+    "SESSION_SECRET": "zyxnime-secret-key-2024"
   }
 }

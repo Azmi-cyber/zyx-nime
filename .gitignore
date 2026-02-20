@@ -1,0 +1,22 @@
+# Dependencies
+node_modules/
+
+# Database
+*.db
+
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# Logs
+*.log
+npm-debug.log*
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Uploads
+public/uploads/*
+!public/uploads/.gitkeep
