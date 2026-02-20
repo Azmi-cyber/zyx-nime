@@ -66,6 +66,7 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.static(__dirname)); // Serve root files too
 app.use(session({
   secret: 'zyxnime-secret-key-2024',
   resave: false,
