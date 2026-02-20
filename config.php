@@ -1,19 +1,18 @@
 <?php
 /**
  * Zyx-nime Configuration File
- * Database and Google OAuth Settings
  */
 
-// Database Configuration for XAMPP
-define('DB_HOST', 'localhost');
-define('DB_NAME', 'zyxnime');
-define('DB_USER', 'root');
-define('DB_PASS', '');
+// Database Configuration - InfinityFree
+define('DB_HOST', 'sql105.infinityfree.com');
+define('DB_NAME', 'if0_41201347_zyxnime');
+define('DB_USER', 'if0_41201347');
+define('DB_PASS', 'azmigantenng');
 
 // Google OAuth Configuration
 define('GOOGLE_CLIENT_ID', '458496826439-2kbdbgtm695ho8l7nbtr3ll4uleuo9f3.apps.googleusercontent.com');
 define('GOOGLE_CLIENT_SECRET', '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');
-define('GOOGLE_REDIRECT_URI', 'http://localhost/zyx-nime/google-callback.php');
+define('GOOGLE_REDIRECT_URI', 'https://zyx-nime.infinityfree.me/google-callback');
 
 // Owner Credentials
 define('OWNER_EMAIL', '200714@gmail.com');
@@ -23,7 +22,8 @@ define('OWNER_AGE', '11');
 
 // Site Configuration
 define('SITE_NAME', 'Zyx-nime');
-define('SITE_URL', 'http://localhost/zyx-nime');
+define('SITE_URL', 'https://zyx-nime.infinityfree.me');
+define('SITE_URL_CLEAN', 'https://zyx-nime.infinityfree.me');
 define('UPLOAD_DIR', __DIR__ . '/uploads/');
 define('VIDEO_DIR', __DIR__ . '/uploads/videos/');
 define('THUMBNAIL_DIR', __DIR__ . '/uploads/thumbnails/');
@@ -86,3 +86,8 @@ function createUploadDirs() {
 
 // Initialize upload directories
 createUploadDirs();
+
+// Helper function for clean URLs
+function url($path = '') {
+    return SITE_URL . '/' . $path;
+}

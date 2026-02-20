@@ -33,7 +33,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $_SESSION['role'] = 'owner';
                     
                     $success = 'Login berhasil! Mengalihkan...';
-                    header('Refresh: 1; URL=index.php');
+                    header('Refresh: 1; URL=index');
                 } else {
                     $error = 'Gagal membuat sesi login!';
                 }

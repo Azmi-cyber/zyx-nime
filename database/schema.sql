@@ -1,9 +1,8 @@
 -- Zyx-nime Database Schema
--- For XAMPP MySQL
+-- Untuk InfinityFree / Hosting Lain
+-- NOTE: Database sudah dibuat di panel hosting
 
--- Create database
-CREATE DATABASE IF NOT EXISTS zyxnime CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-USE zyxnime;
+-- USE zyxnime; -- GANTI dengan nama database lu
 
 -- Users table
 CREATE TABLE IF NOT EXISTS users (
@@ -64,7 +63,7 @@ INSERT INTO owner_verification (email, password_hash, owner_name, owner_age)
 VALUES ('200714@gmail.com', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'azmi', '11')
 ON DUPLICATE KEY UPDATE email = email;
 
--- Insert sample owner user (for Google OAuth)
+-- Insert sample owner user
 INSERT INTO users (google_id, email, name, role, is_verified) 
 VALUES ('owner_google', '200714@gmail.com', 'azmi', 'owner', TRUE)
 ON DUPLICATE KEY UPDATE name = 'azmi', role = 'owner', is_verified = TRUE;

@@ -79,7 +79,7 @@ if (!isset($_GET['code'])) {
                 $_SESSION['role'] = $isOwner ? 'owner' : 'user';
                 
                 // Redirect to index
-                header('Location: index.php');
+                header('Location: index');
                 exit;
                 
             } catch (Exception $e) {
