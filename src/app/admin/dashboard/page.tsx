@@ -11,6 +11,7 @@ interface Anime {
   description: string
   thumbnail: string
   videoUrl: string
+  videos: string[]
   createdAt: string
 }
 
@@ -101,48 +102,63 @@ function DashboardContent() {
     setUploading(true)
     
     try {
-      // Step 1: Get upload URL from API
+      // Send file directly to API (works for both local and Vercel Blob)
       const res = await fetch(`/api/upload?filename=${file.name}&type=video`, {
-        method: 'POST'
+        method: 'POST',
+        body: file
       })
       
       if (!res.ok) {
-        const errorData = await res.json().catch(() => ({ error: 'Failed to get upload URL' }))
-        throw new Error(errorData.error || 'Failed to get upload URL')
+        const errorData = await res.json().catch(() => ({ error: 'Upload failed' }))
+        throw new Error(errorData.error || 'Failed to upload video')
       }
       
-      const { url, downloadUrl } = await res.json()
+      const data = await res.json()
       
-      // Step 2: Upload file to Vercel Blob
-      const uploadRes = await fetch(url, {
-        method: 'PUT',
-        body: file,
-        headers: {
-          'Content-Type': file.type
-        }
-      })
-      
-      if (!uploadRes.ok) throw new Error('Failed to upload video')
-
       // Update anime with video URL
       const updateRes = await fetch(`/api/anime/${animeId}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ videoUrl: downloadUrl })
+        body: JSON.stringify({ videoUrl: data.downloadUrl })
       })
 
       if (updateRes.ok) {
         setShowVideoUpload(null)
         fetchAnimeList()
-        alert('Video uploaded successfully!')
+        alert('Video uploaded successfully! Refresh the anime page to see the new episode.')
       }
     } catch (error) {
       console.error('Error uploading video:', error)
       alert('Error uploading video: ' + (error as Error).message)
     } finally {
       setUploading(false)
+    }
+  }
+
+  // Handle delete specific video episode
+  const handleDeleteVideo = async (animeId: string, videoIndex: number) => {
+    if (!confirm(`Hapus episode ${videoIndex + 1}?`)) return
+
+    try {
+      const res = await fetch(`/api/anime/${animeId}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ deleteVideoIndex: videoIndex })
+      })
+
+      if (res.ok) {
+        fetchAnimeList()
+        alert('Episode dihapus!')
+      } else {
+        alert('Gagal hapus episode')
+      }
+    } catch (error) {
+      console.error('Error deleting video:', error)
+      alert('Error menghapus episode')
     }
   }
 
@@ -171,30 +187,20 @@ function DashboardContent() {
     setUploading(true)
     
     try {
-      // Step 1: Get upload URL from API
+      // Send file directly to API (works for both local and Vercel Blob)
       const res = await fetch(`/api/upload?filename=${file.name}&type=thumbnail`, {
-        method: 'POST'
+        method: 'POST',
+        body: file
       })
       
       if (!res.ok) {
-        const errorData = await res.json().catch(() => ({ error: 'Failed to get upload URL' }))
-        throw new Error(errorData.error || 'Failed to get upload URL')
+        const errorData = await res.json().catch(() => ({ error: 'Upload failed' }))
+        throw new Error(errorData.error || 'Failed to upload thumbnail')
       }
       
-      const { url, downloadUrl } = await res.json()
+      const data = await res.json()
       
-      // Step 2: Upload file to Vercel Blob
-      const uploadRes = await fetch(url, {
-        method: 'PUT',
-        body: file,
-        headers: {
-          'Content-Type': file.type
-        }
-      })
-      
-      if (!uploadRes.ok) throw new Error('Failed to upload thumbnail')
-
-      setFormData(prev => ({ ...prev, thumbnail: downloadUrl }))
+      setFormData(prev => ({ ...prev, thumbnail: data.downloadUrl }))
     } catch (error) {
       console.error('Error uploading thumbnail:', error)
       alert('Error uploading thumbnail: ' + (error as Error).message)
@@ -285,32 +291,65 @@ function DashboardContent() {
                       {anime.description.substring(0, 40)}...
                     </td>
                     <td>
-                      {anime.videoUrl ? (
-                        <span className={styles.videoUploaded}>✓ Sudah Upload</span>
-                      ) : (
-                        <div className={styles.videoUploadSection}>
-                          {showVideoUpload === anime.id ? (
-                            <div className={styles.uploadForm}>
-                              <input
-                                type="file"
-                                accept="video/*"
-                                onChange={(e) => {
-                                  const file = e.target.files?.[0]
-                                  if (file) handleVideoUpload(anime.id, file)
-                                }}
-                                disabled={uploading}
-                              />
-                            </div>
-                          ) : (
+                      <div className={styles.videoSection}>
+                        {showVideoUpload === anime.id ? (
+                          <div className={styles.uploadForm}>
+                            <input
+                              type="file"
+                              accept="video/*"
+                              onChange={(e) => {
+                                const file = e.target.files?.[0]
+                                if (file) handleVideoUpload(anime.id, file)
+                              }}
+                              disabled={uploading}
+                            />
+                            <button
+                              onClick={() => setShowVideoUpload(null)}
+                              style={{ marginLeft: '5px' }}
+                            >
+                              Batal
+                            </button>
+                          </div>
+                        ) : (
+                          <div>
+                            {anime.videos && anime.videos.length > 0 ? (
+                              <div>
+                                <span className={styles.videoUploaded}>
+                                  ✓ {anime.videos.length} Video(s)
+                                </span>
+                                <div style={{ marginTop: '5px' }}>
+                                  {anime.videos.map((video, idx) => (
+                                    <div key={idx} style={{ display: 'flex', alignItems: 'center', gap: '5px', marginBottom: '3px' }}>
+                                      <span style={{ fontSize: '12px' }}>Episode {idx + 1}</span>
+                                      <button
+                                        onClick={() => handleDeleteVideo(anime.id, idx)}
+                                        style={{
+                                          padding: '2px 6px',
+                                          background: '#e63946',
+                                          color: 'white',
+                                          border: 'none',
+                                          borderRadius: '3px',
+                                          cursor: 'pointer',
+                                          fontSize: '10px'
+                                        }}
+                                      >
+                                        Hapus
+                                      </button>
+                                    </div>
+                                  ))}
+                                </div>
+                              </div>
+                            ) : null}
                             <button 
                               className={styles.uploadVideoBtn}
                               onClick={() => setShowVideoUpload(anime.id)}
+                              style={{ marginTop: anime.videos?.length ? '5px' : '0' }}
                             >
-                              🎬 Upload Video
+                              🎬 {anime.videos?.length ? 'Tambah Video' : 'Upload Video'}
                             </button>
-                          )}
-                        </div>
-                      )}
+                          </div>
+                        )}
+                      </div>
                     </td>
                     <td>
                       <div className={styles.actions}>

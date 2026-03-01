@@ -22,21 +22,27 @@ export async function GET(
       return NextResponse.json({ error: 'Anime not found' }, { status: 404 })
     }
 
-    return NextResponse.json(anime)
+    // Parse videoUrl as JSON array
+    const videos = anime.videoUrl ? JSON.parse(anime.videoUrl) : []
+
+    return NextResponse.json({
+      ...anime,
+      videos
+    })
   } catch (error) {
     console.error('Error fetching anime:', error)
     return NextResponse.json({ error: 'Failed to fetch anime' }, { status: 500 })
   }
 }
 
-// PUT - Update anime (add video URL)
+// PUT - Update anime (add video)
 export async function PUT(
   request: Request,
   { params }: { params: { id: string } }
 ) {
   try {
     const body = await request.json()
-    const { videoUrl } = body
+    const { videoUrl, title, description, thumbnail, deleteVideoIndex } = body
 
     const anime = await prisma.anime.findUnique({
       where: { id: params.id }
@@ -46,14 +52,37 @@ export async function PUT(
       return NextResponse.json({ error: 'Anime not found' }, { status: 404 })
     }
 
+    // Get existing videos
+    let videos: string[] = []
+    try {
+      videos = anime.videoUrl ? JSON.parse(anime.videoUrl) : []
+    } catch {
+      videos = []
+    }
+
+    // Delete video by index
+    if (deleteVideoIndex !== undefined && deleteVideoIndex >= 0 && deleteVideoIndex < videos.length) {
+      videos.splice(deleteVideoIndex, 1)
+    }
+    // Add new video if provided
+    else if (videoUrl) {
+      videos.push(videoUrl)
+    }
+
     const updatedAnime = await prisma.anime.update({
       where: { id: params.id },
       data: {
-        videoUrl: videoUrl || anime.videoUrl
+        title: title || anime.title,
+        description: description || anime.description,
+        thumbnail: thumbnail || anime.thumbnail,
+        videoUrl: JSON.stringify(videos)
       }
     })
 
-    return NextResponse.json(updatedAnime)
+    return NextResponse.json({
+      ...updatedAnime,
+      videos
+    })
   } catch (error) {
     console.error('Error updating anime:', error)
     return NextResponse.json({ error: 'Failed to update anime' }, { status: 500 })

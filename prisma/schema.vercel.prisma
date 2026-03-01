@@ -1,29 +1,23 @@
+// Schema ini untuk Vercel Deployment (PostgreSQL)
+// Cara pakai:
+// 1. Copy isi file ini ke schema.prisma
+// 2. Atau rename file ini jadi schema.prisma
+
 generator client {
   provider = "prisma-client-js"
 }
 
-// ============================================
-// DEVELOPMENT (SQLite - untuk lokal)
-// ============================================
 datasource db {
-  provider = "sqlite"
-  url      = "file:./dev.db"
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
 }
-
-// ============================================
-// PRODUCTION (PostgreSQL - untuk Vercel, ganti ke:)
-// ============================================
-// datasource db {
-//   provider = "postgresql"
-//   url      = env("DATABASE_URL")
-// }
 
 model Anime {
   id          String    @id @default(cuid())
   title       String
   description String
   thumbnail   String
-  videoUrl    String    // JSON array of video URLs, e.g. ["url1", "url2"]
+  videoUrl    String    // JSON array of video URLs
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
   comments    Comment[]

@@ -14,7 +14,14 @@ export async function GET() {
         }
       }
     })
-    return NextResponse.json(anime)
+    
+    // Parse videoUrl as JSON array for each anime
+    const animeWithVideos = anime.map(a => ({
+      ...a,
+      videos: a.videoUrl ? JSON.parse(a.videoUrl) : []
+    }))
+    
+    return NextResponse.json(animeWithVideos)
   } catch (error) {
     console.error('Error fetching anime:', error)
     return NextResponse.json({ error: 'Failed to fetch anime' }, { status: 500 })
@@ -25,7 +32,7 @@ export async function GET() {
 export async function POST(request: Request) {
   try {
     const body = await request.json()
-    const { title, description, thumbnail, videoUrl } = body
+    const { title, description, thumbnail, videos } = body
 
     if (!title || !description) {
       return NextResponse.json(
@@ -33,6 +40,9 @@ export async function POST(request: Request) {
         { status: 400 }
       )
     }
+
+    // Store videos as JSON array
+    const videoUrl = videos && videos.length > 0 ? JSON.stringify(videos) : '[]'
 
     const anime = await prisma.anime.create({
       data: {
@@ -43,7 +53,10 @@ export async function POST(request: Request) {
       }
     })
 
-    return NextResponse.json(anime)
+    return NextResponse.json({
+      ...anime,
+      videos: videos || []
+    })
   } catch (error) {
     console.error('Error creating anime:', error)
     return NextResponse.json({ error: 'Failed to create anime' }, { status: 500 })

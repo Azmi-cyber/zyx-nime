@@ -18,6 +18,7 @@ interface Anime {
   description: string
   thumbnail: string | null
   videoUrl: string | null
+  videos: string[]
   comments: Comment[]
 }
 
@@ -27,6 +28,7 @@ export default function AnimePage({ params }: { params: { id: string } }) {
   const [submitting, setSubmitting] = useState(false)
   const [name, setName] = useState('')
   const [content, setContent] = useState('')
+  const [currentVideoIndex, setCurrentVideoIndex] = useState(0)
 
   useEffect(() => {
     fetchAnime()
@@ -129,16 +131,48 @@ export default function AnimePage({ params }: { params: { id: string } }) {
       {/* Video Player */}
       <section className={styles.videoSection}>
         <div className={styles.videoContainer}>
-          <video 
-            className={styles.videoPlayer}
-            controls
-            autoPlay
-            playsInline
-            poster={anime.thumbnail || undefined}
-          >
-            <source src={anime.videoUrl || ''} type="video/mp4" />
-            Your browser does not support the video tag.
-          </video>
+          {anime.videos && anime.videos.length > 0 ? (
+            <>
+              <video 
+                key={currentVideoIndex}
+                className={styles.videoPlayer}
+                controls
+                autoPlay
+                playsInline
+                src={anime.videos[currentVideoIndex]}
+                poster={anime.thumbnail || undefined}
+              >
+                Your browser does not support the video tag.
+              </video>
+              {anime.videos.length > 1 && (
+                <div style={{ marginTop: '10px', display: 'flex', gap: '5px', flexWrap: 'wrap' }}>
+                  {anime.videos.map((video, index) => (
+                    <button
+                      key={index}
+                      onClick={() => {
+                        console.log('Switching to video:', video)
+                        setCurrentVideoIndex(index)
+                      }}
+                      style={{
+                        padding: '5px 10px',
+                        background: currentVideoIndex === index ? '#e63946' : '#333',
+                        color: 'white',
+                        border: 'none',
+                        borderRadius: '4px',
+                        cursor: 'pointer'
+                      }}
+                    >
+                      Episode {index + 1}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </>
+          ) : (
+            <div style={{ padding: '40px', textAlign: 'center', color: '#666' }}>
+              Video belum tersedia
+            </div>
+          )}
         </div>
       </section>
 
