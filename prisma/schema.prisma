@@ -1,0 +1,35 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+// Use SQLite for local development
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+// For Vercel/PostgreSQL production, use:
+// datasource db {
+//   provider = "postgresql"
+//   url      = env("DATABASE_URL")
+// }
+
+model Anime {
+  id          String    @id @default(cuid())
+  title       String
+  description String
+  thumbnail   String
+  videoUrl    String
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  comments    Comment[]
+}
+
+model Comment {
+  id        String   @id @default(cuid())
+  name      String
+  content   String
+  animeId   String
+  anime     Anime    @relation(fields: [animeId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+}
